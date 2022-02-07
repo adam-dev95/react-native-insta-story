@@ -1,108 +1,113 @@
-import React, {useState, useEffect} from "react";
+import React, {Component} from "react";
 import {View, Image, TouchableOpacity, Text, StyleSheet, Platform} from "react-native";
-import {usePrevious} from "./helpers/StateHelpers";
+import colors from "../../../src/global/constants";
 
+// Constants
 import DEFAULT_AVATAR from "./assets/images/no_avatar.png";
 
-const StoryCircleListItem = (props) => {
+// Components
+class StoryCircleListItem extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isPressed: this.props?.item?.seen
+        };
+    }
 
-    const {
-        item,
-        unPressedBorderColor,
-        pressedBorderColor,
-        avatarSize,
-        showText,
-        textStyle
-    } = props;
-
-    const [isPressed, setIsPressed] = useState(props?.item?.seen);
-
-    const prevSeen = usePrevious(props?.item?.seen);
-
-    useEffect(() => {
-        if (prevSeen != props?.item?.seen) {
-            setIsPressed(props?.item?.seen);
-        }
-
-    }, [props?.item?.seen]);
-
-    const _handleItemPress = item => {
-        const {handleStoryItemPress} = props;
+    // Component Functions
+    _handleItemPress = item => {
+        const {handleStoryItemPress} = this.props;
 
         if (handleStoryItemPress) handleStoryItemPress(item);
 
-        setIsPressed(true);
+        this.setState({isPressed: true});
     };
 
-    const size = avatarSize ?? 60;
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.item.seen != this.props.item.seen) {
+            this.setState({isPressed: this.props.item.seen});
+        }
+    }
 
-    return (
-        <View style={styles.container}>
-            <TouchableOpacity
-                onPress={() => _handleItemPress(item)}
-                style={[
-                    styles.avatarWrapper,
-                    {
-                        height: size + 4,
-                        width: size + 4,
-                    },
-                    !isPressed
-                        ? {
-                            borderColor: unPressedBorderColor
-                                ? unPressedBorderColor
-                                : 'red'
-                        }
-                        : {
-                            borderColor: pressedBorderColor
-                                ? pressedBorderColor
-                                : 'grey'
-                        }
-                ]}
-            >
-                <Image
-                    style={{
-                        height: size,
-                        width: size,
-                        borderRadius: 100,
-                    }}
-                    source={{uri: item.user_image}}
-                    defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
-                />
-            </TouchableOpacity>
-            {showText &&
-                <Text
-                    numberOfLines={1}
-                    ellipsizeMode={'tail'}
-                    style={{
-                        width: size + 4,
+    render() {
+        const {
+            item,
+            unPressedBorderColor,
+            pressedBorderColor,
+            avatarSize,
+            showText,
+            textStyle
+        } = this.props;
+        const {isPressed} = this.state;
+        return (
+            <View style={styles.container}>
+                <TouchableOpacity
+                    onPress={() => this._handleItemPress(item)}
+                    style={[
+                        styles.avatarWrapper,
+                        {
+                            height: avatarSize ? avatarSize + 4 : 64,
+                            width: avatarSize ? avatarSize + 4 : 64,
+                            borderRadius: avatarSize > 100 ? 16 : 100,
+                            marginLeft: avatarSize > 100 ? -12 : 0
+
+                        },
+                        !isPressed
+                            ? {
+                                borderColor: unPressedBorderColor
+                                    ? unPressedBorderColor
+                                    : 'red'
+                            }
+                            : {
+                                borderColor: pressedBorderColor
+                                    ? pressedBorderColor
+                                    : 'grey'
+                            }
+                    ]}
+                >
+                    <Image
+                        style={{
+                            height: avatarSize ?? 60,
+                            width: avatarSize ?? 60,
+                            borderRadius: avatarSize > 100 ? 16 : 100,
+                            // borderRadius: 100,
+
+                        }}
+                        source={{uri: item.user_image}}
+                        defaultSource={Platform.OS === 'ios' ? DEFAULT_AVATAR : null}
+                    />
+                </TouchableOpacity>
+                {showText &&
+                    <Text style={{
                         ...styles.text,
                         ...textStyle
-                    }}>{item.user_name}</Text>}
-        </View>
-    );
+                    }}>{`${item.user_name.slice(0, 10)}..`}</Text>}
+            </View>
+        );
+    }
 }
 
 export default StoryCircleListItem;
 
-const styles = StyleSheet.create({
-    container: {
-        marginVertical: 5,
-        marginRight: 10
-    },
-    avatarWrapper: {
-        borderWidth: 2,
-        justifyContent: "center",
-        alignItems: "center",
-        alignSelf: "center",
-        borderColor: 'red',
-        borderRadius: 100,
-        height: 64,
-        width: 64
-    },
-    text: {
-        marginTop: 3,
-        textAlign: "center",
-        alignItems: "center",
-        fontSize: 11
-    }
-});
+const
+    styles = StyleSheet.create({
+        container: {
+            marginVertical: 5,
+            marginRight: 14
+        },
+        avatarWrapper: {
+            borderWidth: 2,
+            justifyContent: "center",
+            alignItems: "center",
+            borderColor: 'red',
+            height: 64,
+            width: 64
+        },
+        text: {
+            fontFamily:'Gelion-Regular',
+            fontSize:14,
+            textAlign:'center',
+            color:colors.dBlue,
+            marginBottom:25
+        }
+    });

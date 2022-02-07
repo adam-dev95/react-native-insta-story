@@ -1,46 +1,78 @@
-import React from "react";
-import {View, FlatList} from "react-native";
+import React, {Component} from "react";
+import {View, FlatList,Text} from "react-native";
 import StoryCircleListItem from "./StoryCircleListItem";
 
-const StoryCircleListView = (props) => {
+class StoryCircleListView extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {};
+    }
 
-    const {
-        data,
-        handleStoryItemPress,
-        unPressedBorderColor,
-        pressedBorderColor,
-        avatarSize,
-        showText,
-        textStyle
-    } = props;
+    render() {
+        const {
+            data,
+            handleStoryItemPress,
+            unPressedBorderColor,
+            pressedBorderColor,
+            avatarSize,
+            showText,
+            textStyle,
+            scroll
+        } = this.props;
 
-    return (
-        <View>
-            <FlatList
-                keyExtractor={(item, index) => index.toString()}
-                data={data}
-                horizontal
-                style={{paddingLeft: 12}}
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-                ListFooterComponent={<View style={{flex: 1, width: 8}}/>}
-                renderItem={({item, index}) => (
-                    <StoryCircleListItem
-                        avatarSize={avatarSize}
-                        handleStoryItemPress={() =>
-                            handleStoryItemPress && handleStoryItemPress(item, index)
-                        }
-                        unPressedBorderColor={unPressedBorderColor}
-                        pressedBorderColor={pressedBorderColor}
-                        item={item}
-                        showText={showText}
-                        textStyle={textStyle}
-                    />
+        return (
+            <View>
+                {scroll ?
+                (
+                    <FlatList
+                    keyExtractor={(item, index) => index.toString()}
+                    data={data}
+                    horizontal
+                    style={{paddingLeft: 12}}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    ListFooterComponent={<View style={{flex: 1, width: 8}}/>}
+                    renderItem={({item, index}) => (
+                        <StoryCircleListItem
+                            avatarSize={avatarSize}
+                            handleStoryItemPress={() =>
+                                handleStoryItemPress && handleStoryItemPress(item, index)
+                            }
+                            unPressedBorderColor={unPressedBorderColor}
+                            pressedBorderColor={pressedBorderColor}
+                            item={item}
+                            showText={showText}
+                            textStyle={textStyle}
+                        />
+                    )}
+                />
+                ) : (
+                    <FlatList
+                    keyExtractor={(item, index) => index.toString()}
+                    data={data}
+                    scrollEnabled={false}
+                    style={{paddingLeft: 12}}
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    ListFooterComponent={<View style={{flex: 1, width: 8}}/>}
+                    renderItem={({item, index}) => (
+                        <StoryCircleListItem
+                            avatarSize={avatarSize}
+                            handleStoryItemPress={() =>
+                                handleStoryItemPress && handleStoryItemPress(item, index)
+                            }
+                            unPressedBorderColor={unPressedBorderColor}
+                            pressedBorderColor={pressedBorderColor}
+                            item={item}
+                            showText={showText}
+                            textStyle={textStyle}
+                        />
+                    )}
+                />
                 )}
-            />
-        </View>
-    );
-
+            </View>
+        );
+    }
 }
 
 export default StoryCircleListView;
