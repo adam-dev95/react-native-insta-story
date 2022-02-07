@@ -1,12 +1,12 @@
-import React, {Fragment, useRef, useState, useEffect} from "react";
-import {Dimensions, View, Platform} from "react-native";
+import React, {Fragment, useRef, useState,useEffect} from "react";
+import {LogBox, Dimensions, View, Platform} from "react-native";
 import Modal from "react-native-modalbox";
 import StoryListItem from "./StoryListItem";
 import StoryCircleListView from "./StoryCircleListView";
 import {isNullOrWhitespace} from "./helpers/ValidationHelpers";
 import type {IUserStory} from "./interfaces/IUserStory";
-import AndroidCubeEffect from "./components/AndroidCubeEffect";
-import CubeNavigationHorizontal from "./components/CubeNavigationHorizontal";
+import AndroidCubeEffect from "./AndroidCubeEffect";
+import CubeNavigationHorizontal from "./CubeNavigationHorizontal";
 import {TextStyle} from "react-native";
 
 type Props = {
@@ -22,8 +22,13 @@ type Props = {
     customCloseComponent?: any,
     avatarSize?: number,
     showAvatarText?: boolean,
-    avatarTextStyle?: TextStyle
+    avatarTextStyle?: TextStyle,
+    user?:Boolean,
+    radius?:Number,
+    scroll?:Boolean
 };
+
+LogBox.ignoreLogs(['Warning: componentWillReceiveProps']); // Ignore log notification by message
 
 export const Story = (props: Props) => {
     const {
@@ -39,7 +44,10 @@ export const Story = (props: Props) => {
         customCloseComponent,
         avatarSize,
         showAvatarText,
-        avatarTextStyle
+        avatarTextStyle,
+        user,
+        radius,
+        scroll
     } = props;
 
     const [dataState, setDataState] = useState(data);
@@ -62,13 +70,13 @@ export const Story = (props: Props) => {
 
     useEffect(() => {
         handleSeen();
-    }, [currentPage]);
+    },[currentPage]);
 
     const handleSeen = () => {
         const seen = selectedData[currentPage];
         const seenIndex = dataState.indexOf(seen);
         if (seenIndex > 0) {
-            if (!dataState[seenIndex]?.seen) {
+            if(!dataState[seenIndex]?.seen){
                 let tempData = dataState;
                 dataState[seenIndex] = {
                     ...dataState[seenIndex],
@@ -111,6 +119,8 @@ export const Story = (props: Props) => {
                                key={i}
                                profileName={x.user_name}
                                profileImage={x.user_image}
+                               id={x.user_id}
+                               user={props.user}
                                stories={x.stories}
                                currentPage={currentPage}
                                onFinish={onStoryFinish}
@@ -165,6 +175,7 @@ export const Story = (props: Props) => {
                     pressedBorderColor={pressedBorderColor}
                     showText={showAvatarText}
                     textStyle={avatarTextStyle}
+                    scroll={props.scroll}
                 />
             </View>
             <Modal
