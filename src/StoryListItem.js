@@ -10,7 +10,8 @@ import {
     ActivityIndicator,
     View,
     Platform,
-    SafeAreaView
+    SafeAreaView,
+    KeyboardAvoidingView
 } from "react-native";
 import type {IUserStoryItem} from "./interfaces/IUserStory";
 import {usePrevious} from "./helpers/StateHelpers";
@@ -20,7 +21,8 @@ import firebase from '@react-native-firebase/app';
 import { useNavigation } from '@react-navigation/native';
 import colors, { screen } from '../../../src/global/constants';
 import SlidingUpPanel from 'rn-sliding-up-panel'
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
+
 
 
 
@@ -48,6 +50,8 @@ export const StoryListItem = (props: Props) => {
 
     const [load, setLoad] = useState(true);
     const [pressed, setPressed] = useState(false);
+    const [comment, setComment] = useState(true)
+    const [chat, setChat] = useState('')
     const [open, setOpen] = useState(false);
     const [content, setContent] = useState(
         stories.map((x) => {
@@ -128,6 +132,7 @@ export const StoryListItem = (props: Props) => {
     function next() {
         // check if the next content is not empty
         setLoad(true);
+        setChat('')
         if (current !== content.length - 1) {
             let data = [...content];
             data[current].finish = 1;
@@ -143,6 +148,8 @@ export const StoryListItem = (props: Props) => {
     function previous() {
         // checking if the previous content is not empty
         setLoad(true);
+        setChat('')
+
         if (current - 1 >= 0) {
             let data = [...content];
             data[current].finish = 0;
@@ -230,6 +237,103 @@ export const StoryListItem = (props: Props) => {
         startAnimation()
     }
 
+    pressTextInput = () => {
+        time=JSON.stringify(progress)
+        time=parseFloat(time)
+        progress.setValue(time)
+    }
+
+    outTextInput = () => {
+        startAnimation()
+    }
+
+    sendChat = () =>{
+        destinataireId=props.id
+        destinataireName=props.profileName
+        photoUrl=props.profileImage
+        story_id=content[current].story_id
+        storyImg=content[current].image
+
+        let toSend = { 
+            _id: db.collection("chats").doc().id,
+            createdAt: new Date(),
+            destinataireId: destinataireId,
+            destinataireSeen: false,
+            share: {
+              message:chat,
+              story_id: story_id,
+              story:storyImg,
+              typeContent: 'story',
+              contentUser:{
+                  photoURL:photoUrl,
+                  displayName:destinataireName,
+                  id:destinataireId
+              }
+            },
+            user: {
+              _id: firebase.auth().currentUser.uid,
+              avatar: firebase.auth().currentUser.photoURL,
+              name: firebase.auth().currentUser.displayName
+            },
+        }
+        // const chatId = props.id + firebase.auth().currentUser.uid
+        if (firebase.auth().currentUser.uid < props.id) {
+            chatId = firebase.auth().currentUser.uid + props.id;
+          } else {
+            chatId = props.id + firebase.auth().currentUser.uid;
+          }
+        let chatRef = db.collection("chats").doc(chatId);
+
+        let userChatRef = db
+        .collection("users")
+        .doc(firebase.auth().currentUser.uid)
+        .collection("chats")
+        .doc(chatId)
+
+        let destinataireChatRef = db
+          .collection("users")
+          .doc(destinataireId)
+          .collection("chats")
+          .doc(chatId)
+        chatRef
+          .get()
+          .then(async chat => {
+            if (!chat.exists) {
+              chatRef.set(
+                {
+                  users: [firebase.auth().currentUser.uid, destinataireId]
+                },
+                { merge: true }
+              )
+              .then(() => {
+                userChatRef.set(
+                  {
+                    users: [destinaireId]
+                  },
+                  { merge: true }
+                ).then(() => {
+                  destinataireChatRef.set(
+                    {
+                      users: [firebase.auth().currentUser.uid]
+                    },
+                    { merge: true }
+                  )
+                })
+              })
+            }
+            chatRef.collection("messages")
+              .add(toSend)
+              .then(async ref => {
+                await userChatRef.update({lastMessage: toSend.createdAt})
+                await destinataireChatRef.update({lastMessage: toSend.createdAt})
+                await chatRef.update({lastMessage: toSend.createdAt})
+              })
+          })
+          setChat('')
+    }
+
+
+
 
     const swipeText = content?.[current]?.swipeText || props.swipeText || 'Swipe Up';
      if(props.user){
@@ -247,7 +351,7 @@ export const StoryListItem = (props: Props) => {
                     <View style={styles.backgroundContainer}>
                         <Image onLoadEnd={() => start()}
                             source={{uri: content[current].image}}
-                            style={styles.image}
+                            style={styles.imageUser}
                         />
                         {load && <View style={styles.spinnerContainer}>
                             <ActivityIndicator size="large" color={'white'}/>
@@ -349,7 +453,7 @@ export const StoryListItem = (props: Props) => {
                     animatedValue={new Animated.Value(0)}
                     containerStyle={styles.containerSliding}
                     draggableRange={{ top: 140, bottom: 0 }}
-                    showBackdrop={true}
+                    showBackdrop={false}
                     allowDragging={false}
                     snappingPoints={[140, 0]}
                 >
@@ -372,6 +476,7 @@ export const StoryListItem = (props: Props) => {
         )
      }else{
         return (
+
             <GestureRecognizer
                 onSwipeUp={(state) => onSwipeUp(state)}
                 onSwipeDown={(state) => onSwipeDown(state)}
@@ -385,7 +490,7 @@ export const StoryListItem = (props: Props) => {
                     <View style={styles.backgroundContainer}>
                         <Image onLoadEnd={() => start()}
                             source={{uri: content[current].image}}
-                            style={styles.image}
+                            style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
                         />
                         {load && <View style={styles.spinnerContainer}>
                             <ActivityIndicator size="large" color={'white'}/>
@@ -462,18 +567,63 @@ export const StoryListItem = (props: Props) => {
                         </TouchableWithoutFeedback>
                     </View>
                 </View>
-                {content[current].onPress &&
-                <TouchableOpacity activeOpacity={1}
-                                  onPress={onSwipeUp}
-                                  style={styles.swipeUpBtn}>
-                    {props.customSwipeUpComponent ?
-                        props.customSwipeUpComponent :
-                        <>
-                            <Text style={{color: 'white', marginTop: 5}}></Text>
-                            <Text style={{color: 'white', marginTop: 5}}>{swipeText}</Text>
-                        </>
-                    }
-                </TouchableOpacity>}
+                {props.id === firebase.auth().currentUser.uid ? (
+                    <View></View>
+                ):(
+                    comment ? (
+                        <KeyboardAvoidingView style={styles.keyboard} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200} behavior={'position'}>
+                        <View style={[styles.bottom, {minHeight: screen.h/9 }]}>
+                          <View style={[styles.rowContainer]}
+
+                          >
+                            <TextInput
+                              style={styles.input}
+                              value={chat}
+                              placeholder={'Ecrivez votre message...'}
+                              placeholderTextColor={colors.label}
+                              keyboardType={"default"}
+                              maxLength={25}
+                              multiline={true}
+                              returnKeyType={"done"}
+                              onChangeText={e => setChat(e)}
+                              ref={input => { text = input }}
+                              onFocus={pressTextInput}
+                              onBlur={outTextInput}
+                            />
+                            {chat.length > 0 ? (
+                                <TouchableOpacity
+                                    onPress={this.sendChat}
+                                    style={styles.sendButton}
+                                >
+                                    <Image
+                                      source={require("../../../src/assets/images/icons/bxs-sendWhite.png")}
+                                      resizeMode={"contain"}
+                                      style={styles.illuSend}
+                                    />
+                                </TouchableOpacity>
+                            ) :(
+                            <TouchableOpacity
+                                onPress={this.sendChat}
+                                style={styles.sendButton}
+                                disabled
+                            >
+                                    <Image
+                                      source={require("../../../src/assets/images/icons/bxs-sendWhite.png")}
+                                      resizeMode={"contain"}
+                                      style={styles.illuSend}
+                                    />
+                          </TouchableOpacity>)}
+                          </View>
+                        </View>
+                        <View style={styles.feinte}></View>
+
+                      </KeyboardAvoidingView>
+                ) : (
+                    <View>
+
+                    </View>
+                )
+                )}
             </GestureRecognizer>
         )
      }
@@ -492,6 +642,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#000',
     },
     image: {
+        width: width,
+        height: height,
+        resizeMode: 'cover'
+    },
+    imageUser:{
         width: width,
         height: height,
         resizeMode: 'cover'
@@ -628,4 +783,80 @@ const styles = StyleSheet.create({
     optionArrow: {
         marginRight: 20,
     },
+    comment:{
+        height:40,
+        width:screen.w/1.5,
+        backgroundColor:'rgba(0, 0, 0, 0.4)',
+        alignSelf:'center',
+        borderRadius:12,
+        marginBottom:10,
+        justifyContent:'center'
+
+    },
+    commentButton:{
+        paddingLeft:15
+    },
+    commentText:{
+        color:'white',
+        fontFamily:'Gelion-Medium'
+    },
+    keyboard: {
+        position: 'absolute',
+        bottom:0,
+        zIndex: 100,
+        marginTop:20
+
+      },
+      bottom: {
+        width: screen.w,
+        paddingHorizontal: 20,
+        backgroundColor:'rgb(49,37,33)',
+        justifyContent:'center',
+
+      },
+      rowContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: 'space-between',
+        width: screen.w - 40,
+
+      },
+      input: {
+        fontFamily: "Gelion-Light",
+        fontSize: 17,
+        color: 'white',
+        width: screen.w / 1.4,
+        height: "100%",
+        paddingHorizontal: 20,
+        borderWidth: 1,
+        borderColor: colors.greyBorder,
+        borderRadius: 20,
+        backgroundColor:'rgb(49,37,33)',
+        paddingTop:10,
+
+      },
+      label: {
+        fontFamily: "Gilroy-Light",
+        fontSize: 17,
+        color: 'white',
+        marginLeft: 25
+      },
+      sendButton: {
+        backgroundColor:'grey',
+        height: 45,
+        width: 45,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 16,
+      },
+      illuSend: {
+        width: 20,
+        height: 20
+      },
+      feinte:{
+          height:20,
+          width:width,
+          backgroundColor:'rgb(49,37,33)'
+        }
+
 });

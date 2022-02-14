@@ -67,11 +67,9 @@ export const Story = (props: Props) => {
         setSelectedData(newData);
         setIsModalOpen(true);
     };
-
     useEffect(() => {
         handleSeen();
     },[currentPage]);
-
     const handleSeen = () => {
         const seen = selectedData[currentPage];
         const seenIndex = dataState.indexOf(seen);
