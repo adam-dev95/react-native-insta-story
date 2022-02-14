@@ -276,12 +276,13 @@ export const StoryListItem = (props: Props) => {
               name: firebase.auth().currentUser.displayName
             },
         }
-        // const chatId = props.id + firebase.auth().currentUser.uid
+        
         if (firebase.auth().currentUser.uid < props.id) {
             chatId = firebase.auth().currentUser.uid + props.id;
           } else {
             chatId = props.id + firebase.auth().currentUser.uid;
           }
+
         let chatRef = db.collection("chats").doc(chatId);
 
         let userChatRef = db
@@ -308,7 +309,7 @@ export const StoryListItem = (props: Props) => {
               .then(() => {
                 userChatRef.set(
                   {
-                    users: [destinaireId]
+                    users: [destinataireId]
                   },
                   { merge: true }
                 ).then(() => {
@@ -333,9 +334,6 @@ export const StoryListItem = (props: Props) => {
           startAnimation()
 
     }
-
-
-
 
     const swipeText = content?.[current]?.swipeText || props.swipeText || 'Swipe Up';
      if(props.user){
