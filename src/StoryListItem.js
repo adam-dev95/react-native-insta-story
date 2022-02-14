@@ -243,9 +243,9 @@ export const StoryListItem = (props: Props) => {
         progress.setValue(time)
     }
 
-    outTextInput = () => {
-        startAnimation()
-    }
+    // outTextInput = () => {
+    //     startAnimation()
+    // }
 
     sendChat = () =>{
         destinataireId=props.id
@@ -254,7 +254,7 @@ export const StoryListItem = (props: Props) => {
         story_id=content[current].story_id
         storyImg=content[current].image
 
-        let toSend = { 
+        let toSend = {
             _id: db.collection("chats").doc().id,
             createdAt: new Date(),
             destinataireId: destinataireId,
@@ -330,6 +330,8 @@ export const StoryListItem = (props: Props) => {
               })
           })
           setChat('')
+          startAnimation()
+
     }
 
 
@@ -574,7 +576,6 @@ export const StoryListItem = (props: Props) => {
                         <KeyboardAvoidingView style={styles.keyboard} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200} behavior={'position'}>
                         <View style={[styles.bottom, {minHeight: screen.h/9 }]}>
                           <View style={[styles.rowContainer]}
-
                           >
                             <TextInput
                               style={styles.input}
@@ -586,9 +587,7 @@ export const StoryListItem = (props: Props) => {
                               multiline={true}
                               returnKeyType={"done"}
                               onChangeText={e => setChat(e)}
-                              ref={input => { text = input }}
                               onFocus={pressTextInput}
-                              onBlur={outTextInput}
                             />
                             {chat.length > 0 ? (
                                 <TouchableOpacity
@@ -615,7 +614,7 @@ export const StoryListItem = (props: Props) => {
                           </TouchableOpacity>)}
                           </View>
                         </View>
-                        <View style={styles.feinte}></View>
+                        <View style={styles.box}></View>
 
                       </KeyboardAvoidingView>
                 ) : (
@@ -853,7 +852,7 @@ const styles = StyleSheet.create({
         width: 20,
         height: 20
       },
-      feinte:{
+      box:{
           height:20,
           width:width,
           backgroundColor:'rgb(49,37,33)'
