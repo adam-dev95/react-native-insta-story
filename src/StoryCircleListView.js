@@ -1,3 +1,4 @@
+import { firebase } from "@react-native-firebase/messaging";
 import React, {Component} from "react";
 import {View, FlatList,Text} from "react-native";
 import StoryCircleListItem from "./StoryCircleListItem";
@@ -33,17 +34,36 @@ class StoryCircleListView extends Component {
                     showsHorizontalScrollIndicator={false}
                     ListFooterComponent={<View style={{flex: 1, width: 8}}/>}
                     renderItem={({item, index}) => (
-                        <StoryCircleListItem
-                            avatarSize={avatarSize}
-                            handleStoryItemPress={() =>
-                                handleStoryItemPress && handleStoryItemPress(item, index)
-                            }
-                            unPressedBorderColor={unPressedBorderColor}
-                            pressedBorderColor={pressedBorderColor}
-                            item={item}
-                            showText={showText}
-                            textStyle={textStyle}
-                        />
+                        <View>
+                            {item.user_name === 'Sponsoring' ?
+                            (
+                                <View style={{display:'none'}}>
+                                <StoryCircleListItem
+                                avatarSize={avatarSize}
+                                handleStoryItemPress={() =>
+                                    handleStoryItemPress && handleStoryItemPress(item, index)
+                                }
+                                unPressedBorderColor={unPressedBorderColor}
+                                pressedBorderColor={pressedBorderColor}
+                                item={item}
+                                showText={showText}
+                                textStyle={textStyle}
+                            />
+                            </View>
+                            ):(
+                                <StoryCircleListItem
+                                avatarSize={avatarSize}
+                                handleStoryItemPress={() =>
+                                    handleStoryItemPress && handleStoryItemPress(item, index)
+                                }
+                                unPressedBorderColor={unPressedBorderColor}
+                                pressedBorderColor={pressedBorderColor}
+                                item={item}
+                                showText={showText}
+                                textStyle={textStyle}
+                            />
+                            )}
+                            </View>
                     )}
                 />
                 ) : (

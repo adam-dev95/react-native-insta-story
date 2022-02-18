@@ -22,6 +22,8 @@ import { useNavigation } from '@react-navigation/native';
 import colors, { screen } from '../../../src/global/constants';
 import SlidingUpPanel from 'rn-sliding-up-panel'
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import admob,{ BannerAdSize, MaxAdContentRating } from '@react-native-firebase/admob'
+import { InterstitialAd, RewardedAd, BannerAd, TestIds } from '@react-native-firebase/admob';
 
 
 
@@ -78,6 +80,21 @@ export const StoryListItem = (props: Props) => {
             setContent(data)
             start();
         }
+        admob()
+        .setRequestConfiguration({
+        // Update all future requests suitable for parental guidance
+        maxAdContentRating: MaxAdContentRating.PG,
+          
+        // Indicates that you want your content treated as child-directed for purposes of COPPA.
+        tagForChildDirectedTreatment: true,
+          
+        // Indicates that you want the ad request to be handled in a
+        // manner suitable for users under the age of consent.
+        tagForUnderAgeOfConsent: true,
+      })
+      .then(() => {
+        // Request config successfully set!
+      });
     }, [props.currentPage]);
 
     const prevCurrent = usePrevious(current);
@@ -243,10 +260,6 @@ export const StoryListItem = (props: Props) => {
         progress.setValue(time)
     }
 
-    // outTextInput = () => {
-    //     startAnimation()
-    // }
-
     sendChat = () =>{
         destinataireId=props.id
         destinataireName=props.profileName
@@ -276,13 +289,12 @@ export const StoryListItem = (props: Props) => {
               name: firebase.auth().currentUser.displayName
             },
         }
-        
+        // const chatId = props.id + firebase.auth().currentUser.uid
         if (firebase.auth().currentUser.uid < props.id) {
             chatId = firebase.auth().currentUser.uid + props.id;
           } else {
             chatId = props.id + firebase.auth().currentUser.uid;
           }
-
         let chatRef = db.collection("chats").doc(chatId);
 
         let userChatRef = db
@@ -332,8 +344,8 @@ export const StoryListItem = (props: Props) => {
           })
           setChat('')
           startAnimation()
-
     }
+
 
     const swipeText = content?.[current]?.swipeText || props.swipeText || 'Swipe Up';
      if(props.user){
@@ -476,7 +488,6 @@ export const StoryListItem = (props: Props) => {
         )
      }else{
         return (
-
             <GestureRecognizer
                 onSwipeUp={(state) => onSwipeUp(state)}
                 onSwipeDown={(state) => onSwipeDown(state)}
@@ -515,14 +526,22 @@ export const StoryListItem = (props: Props) => {
                     </View>
                     <View style={styles.userContainer}>
                         <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                            <Image style={styles.avatarImage}
-                                   source={{uri: props.profileImage}}
-                            />
+                            {props.profileName === 'Sponsoring' ? (
+                                <Image style={styles.avatarImage}
+                                    source={require("../../../src/assets/images/logoNotif.png")}
+                                />
+                            ):(
+                                <Image style={styles.avatarImage}
+                                    source={{uri: props.profileImage}}
+                                />
+                            )}
+
                             <TouchableOpacity
                             onPress={getProfileInfos}>
                             <Text style={styles.avatarText}>{props.profileName}</Text>
                             </TouchableOpacity>
                         </View>
+
                         <TouchableOpacity onPress={() => {
                             if (props.onClosePress) {
                                 props.onClosePress();
@@ -567,7 +586,17 @@ export const StoryListItem = (props: Props) => {
                         </TouchableWithoutFeedback>
                     </View>
                 </View>
-                {props.id === firebase.auth().currentUser.uid ? (
+                {props.profileName === 'Sponsoring' ? (
+                            <View style={styles.adsContainer}>
+                                <TouchableOpacity
+                                onPress={()=>setTimeout( ()=> props.onClosePress(),2000)}>
+                                <BannerAd unitId={TestIds.BANNER} size={BannerAdSize.MEDIUM_RECTANGLE} />
+                                </TouchableOpacity>
+                            </View>
+                        ):(
+                            <View></View>
+                        )}
+                {props.id === firebase.auth().currentUser.uid || props.profileName === 'Sponsoring'? (
                     <View></View>
                 ):(
                     comment ? (
@@ -851,9 +880,20 @@ const styles = StyleSheet.create({
         height: 20
       },
       box:{
-          height:20,
-          width:width,
-          backgroundColor:'rgb(49,37,33)'
-        }
+        height:20,
+        width:width,
+        backgroundColor:'rgb(49,37,33)'
+    },
+     adsContainer:{
+        alignItems:'center',
+        justifyContent:'center',
+        width:400,
+        height:300,
+        marginBottom:250,
+        transform: [
+            { scaleX: 1.3},
+            { scaleY: 2.5 }
+        ],
+     }
 
 });

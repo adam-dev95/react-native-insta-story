@@ -55,7 +55,6 @@ export const Story = (props: Props) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [selectedData, setSelectedData] = useState([]);
     const cube = useRef();
-
     // Component Functions
     const _handleStoryItemPress = (item, index) => {
         const newData = dataState.slice(index);

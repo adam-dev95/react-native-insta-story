@@ -1,6 +1,8 @@
 import React, {Component} from "react";
 import {View, Image, TouchableOpacity, Text, StyleSheet, Platform} from "react-native";
 import colors from "../../../src/global/constants";
+import firebase from '@react-native-firebase/app';
+
 
 // Constants
 import DEFAULT_AVATAR from "./assets/images/no_avatar.png";
