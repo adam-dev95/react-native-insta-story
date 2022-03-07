@@ -19,14 +19,21 @@ import {isNullOrWhitespace} from "./helpers/ValidationHelpers";
 import GestureRecognizer from 'react-native-swipe-gestures';
 import firebase from '@react-native-firebase/app';
 import { useNavigation } from '@react-navigation/native';
-import colors, { screen } from '../../../src/global/constants';
+import colors, { screen, shadowStyles } from '../../../src/global/constants';
 import SlidingUpPanel from 'rn-sliding-up-panel'
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
-import admob,{ BannerAdSize, MaxAdContentRating } from '@react-native-firebase/admob'
-import { InterstitialAd, RewardedAd, BannerAd, TestIds } from '@react-native-firebase/admob';
-
-
-
+import NativeAdView, {
+    AdvertiserView,
+    HeadlineView,
+    StarRatingView,
+    StoreView,
+    TaglineView,
+    ImageView,
+    NativeMediaView,
+    IconView
+  } from 'react-native-admob-native-ads';
+import {AdManager} from 'react-native-admob-native-ads';
+import Video from 'react-native-video';
 
 
 
@@ -54,6 +61,16 @@ export const StoryListItem = (props: Props) => {
     const [pressed, setPressed] = useState(false);
     const [comment, setComment] = useState(true)
     const [chat, setChat] = useState('')
+    const [durationTime, setDurationTime] = useState(0)
+    const nativeAdViewRef = useRef();
+    const video = useRef();
+    const configAds = {
+        maxAdContetRating: "MA",
+        tagForChildDirectedTreatment: false,
+        tagForUnderAgeConsent: false,
+      };
+    AdManager.setRequestConfiguration(configAds);
+
     const [open, setOpen] = useState(false);
     const [content, setContent] = useState(
         stories.map((x) => {
@@ -80,21 +97,7 @@ export const StoryListItem = (props: Props) => {
             setContent(data)
             start();
         }
-        admob()
-        .setRequestConfiguration({
-        // Update all future requests suitable for parental guidance
-        maxAdContentRating: MaxAdContentRating.PG,
-          
-        // Indicates that you want your content treated as child-directed for purposes of COPPA.
-        tagForChildDirectedTreatment: true,
-          
-        // Indicates that you want the ad request to be handled in a
-        // manner suitable for users under the age of consent.
-        tagForUnderAgeOfConsent: true,
-      })
-      .then(() => {
-        // Request config successfully set!
-      });
+        nativeAdViewRef.current?.loadAd();
     }, [props.currentPage]);
 
     const prevCurrent = usePrevious(current);
@@ -110,22 +113,34 @@ export const StoryListItem = (props: Props) => {
 
     }, [current]);
 
-    function start() {
+    function start(e) {
         setLoad(false);
         progress.setValue(0);
-        startAnimation();
+        startAnimation(e);
     }
 
-    function startAnimation() {
-        Animated.timing(progress, {
-            toValue: 1,
-            duration: props.duration,
-            useNativeDriver: false
-        }).start(({finished}) => {
-            if (finished) {
-                next();
-            }
-        });
+    function startAnimation(e) {
+        if (content[current].image.includes('videoStory')){
+            Animated.timing(progress, {
+                toValue: 1,
+                duration:e*1000,
+                useNativeDriver: false
+            }).start(({finished}) => {
+                if (finished) {
+                    next();
+                }
+            });
+        }else{
+            Animated.timing(progress, {
+                toValue: 1,
+                duration: 10000,
+                useNativeDriver: false
+            }).start(({finished}) => {
+                if (finished) {
+                    next();
+                }
+            });
+        }
     }
 
     function onSwipeUp() {
@@ -218,7 +233,6 @@ export const StoryListItem = (props: Props) => {
      }
 
      slidePanel = () => {
-
         if(!open){
             _panel.show()
             setOpen(!open)
@@ -289,7 +303,6 @@ export const StoryListItem = (props: Props) => {
               name: firebase.auth().currentUser.displayName
             },
         }
-        // const chatId = props.id + firebase.auth().currentUser.uid
         if (firebase.auth().currentUser.uid < props.id) {
             chatId = firebase.auth().currentUser.uid + props.id;
           } else {
@@ -346,6 +359,22 @@ export const StoryListItem = (props: Props) => {
           startAnimation()
     }
 
+    function Logger(tag = 'AD', type, value) {
+        console.log(`[${tag}][${type}]:`, value);
+      }
+
+    const onAdFailedToLoad = event => {
+        Logger('AD', 'FAILED', event.error.message);
+      };
+
+    const onAdLoaded = () => {
+        Logger('AD', 'LOADED', 'Ad has loaded successfully');
+    };
+
+    const onAdClicked = () => {
+        Logger('AD', 'CLICK', 'User has clicked the Ad');
+        props.onClosePress
+      };
 
     const swipeText = content?.[current]?.swipeText || props.swipeText || 'Swipe Up';
      if(props.user){
@@ -499,10 +528,54 @@ export const StoryListItem = (props: Props) => {
             >
                 <SafeAreaView>
                     <View style={styles.backgroundContainer}>
-                        <Image onLoadEnd={() => start()}
-                            source={{uri: content[current].image}}
-                            style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
-                        />
+                        { content[current].image.includes("videoStory") ?(
+                            <>
+                                <Video
+                                    source={{uri: content[current].image}}
+                                    ref={video}
+                                    style={styles.image}
+                                    onLoad={ e => start(e.duration)}
+
+                                />
+                            </>
+                        )
+                        :
+                        <>
+                            <Image onLoadEnd={() => start()}
+                                source={props.profileName === 'Sponsoring' ? require("../../../src/assets/images/fullSaumonLight.png") : {uri: content[current].image} }
+                                style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
+                            />
+                        </>
+                        }
+                        {/* {props.stories.map(doc=>{
+                            if(doc.type =='image'){
+                                return(
+                                    <Image onLoadEnd={() => start()}
+                                    source={props.profileName === 'Sponsoring' ? require("../../../src/assets/images/fullSaumonLight.png") : {uri: content[current].image} }
+                                    style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
+                                />
+                                )
+                            }
+                            else if(doc.type =='video'){
+                                return(
+                                <Video
+                                    source={{uri: content[current].image}}
+                                    ref={video}
+                                    style={styles.image}
+                                    onLoad={ e => start(e.duration)}
+                                />
+                                )
+                            }
+                            else{
+                                return(
+                                    <Image onLoadEnd={() => start()}
+                                    source={props.profileName === 'Sponsoring' ? require("../../../src/assets/images/fullSaumonLight.png") : {uri: content[current].image} }
+                                    style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
+                                />
+                                )
+                            }
+                        })} */}
+
                         {load && <View style={styles.spinnerContainer}>
                             <ActivityIndicator size="large" color={'white'}/>
                         </View>}
@@ -537,7 +610,7 @@ export const StoryListItem = (props: Props) => {
                             )}
 
                             <TouchableOpacity
-                            onPress={getProfileInfos}>
+                                onPress={()=> console.log(content[current].image)}>
                             <Text style={styles.avatarText}>{props.profileName}</Text>
                             </TouchableOpacity>
                         </View>
@@ -587,12 +660,110 @@ export const StoryListItem = (props: Props) => {
                     </View>
                 </View>
                 {props.profileName === 'Sponsoring' ? (
-                            <View style={styles.adsContainer}>
-                                <TouchableOpacity
-                                onPress={()=>setTimeout( ()=> props.onClosePress(),2000)}>
-                                <BannerAd unitId={TestIds.BANNER} size={BannerAdSize.MEDIUM_RECTANGLE} />
-                                </TouchableOpacity>
+                        <View style={styles.adsContainer}>
+                            <View style={styles.containerAds}>
+                                <NativeAdView
+                                    ref={nativeAdViewRef}
+                                    refreshInterval={60000 * 2}
+                                    onAdClicked={onAdClicked}
+                                    style={{
+                                           width: '100%',
+                                           height:'80%',
+                                           alignSelf: 'center',
+                                           backgroundColor:"transparent",
+                                    }}
+                                    enableTestMode
+                                    adUnitID="ca-app-pub-3940256099942544/2247696110"
+                                >
+                                    <View
+                                        style={{
+                                          width: '100%',
+                                        }}
+                                    >
+                                        <ImageView 
+                                            style={{
+                                              width: "100%",
+                                              height:190,
+                                              marginTop:5,
+                                              zIndex:100
+                                            }}
+                                        />
+                                        <View 
+                                            style={{
+                                                marginTop:-10,
+                                                height:350,
+                                                width:"100%",
+                                                backgroundColor:'rgb(245,165,114)',
+                                                borderBottomEndRadius:20,
+                                                borderBottomStartRadius:20,
+                                                alignItems:'center',
+                                                paddingLeft:30,
+                                                paddingRight:30
+                                            }}>
+                                            <IconView
+                                                style={{
+                                                    width: 70,
+                                                    height: 70,
+                                                    marginTop:50
+                                                }}
+                                            />
+
+                                             <HeadlineView
+                                              style={{
+                                                fontSize: 18,
+                                                fontFamily:'Gelion-Regular',
+                                                marginTop:20,
+                                                textAlign:'center',
+                                              }}
+                                            />
+                                            <TaglineView
+                                              numberOfLines={2}
+                                              style={{
+                                                marginTop:15,
+                                                fontSize: 14,
+                                                fontFamily:'Gilroy-Medium',
+                                                textAlign:'center'
+                                              }}
+                                            />
+                                            <AdvertiserView
+                                              style={{
+                                                fontSize: 10,
+                                                color: 'gray',
+                                              }}
+                                            />
+                                            <StoreView
+                                                style={{
+                                                  fontSize: 12,
+                                                  marginTop:15
+                                                }}
+                                            />
+                                            <View
+                                                style={{
+                                                    marginTop:20,
+                                                    height:50,
+                                                    width:"100%",
+                                                    backgroundColor:'rgb( 252,232,201)',
+                                                    borderRadius:12,
+                                                    justifyContent:'center',
+                                                    alignItems:'center',
+                                                    ...shadowStyles
+                                                }}
+                                            >
+                                                <Text
+                                                style={{
+                                                    fontFamily:'Gelion-Medium',
+                                                    fontSize:20,
+                                                    color:colors.dBlue
+                                                }}>Visiter</Text>
+
+                                            </View>
+
+                                        </View>
+
+                                </View>
+                            </NativeAdView>
                             </View>
+                        </View>
                         ):(
                             <View></View>
                         )}
@@ -885,15 +1056,16 @@ const styles = StyleSheet.create({
         backgroundColor:'rgb(49,37,33)'
     },
      adsContainer:{
-        alignItems:'center',
-        justifyContent:'center',
-        width:400,
-        height:300,
-        marginBottom:250,
-        transform: [
-            { scaleX: 1.3},
-            { scaleY: 2.5 }
-        ],
+        marginTop:100,
+        height:screen.h-110,
+        width: screen.w,
+        padding:20,
+     },
+     containerAds:{
+         backgroundColor:'#f0f0f0',
+         borderRadius:20,
+         padding:10,
+         ...shadowStyles
      }
 
 });
