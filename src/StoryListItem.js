@@ -542,7 +542,7 @@ export const StoryListItem = (props: Props) => {
                             :
                             <>
                                 <Image onLoadEnd={() => start()}
-                                    source={props.profileName === 'Sponsoring' ? require("assets/images/fullSaumonLight.png") : { uri: content[current].image }}
+                                    source={props.profileName === 'Sponsoring' ? require("./assets/images/fullSaumonLight.png") : { uri: content[current].image }}
                                     style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
                                 />
                             </>
@@ -551,7 +551,7 @@ export const StoryListItem = (props: Props) => {
                             if(doc.type =='image'){
                                 return(
                                     <Image onLoadEnd={() => start()}
-                                    source={props.profileName === 'Sponsoring' ? require("assets/images/fullSaumonLight.png") : {uri: content[current].image} }
+                                    source={props.profileName === 'Sponsoring' ? require("./assets/images/fullSaumonLight.png") : {uri: content[current].image} }
                                     style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
                                 />
                                 )
@@ -569,7 +569,7 @@ export const StoryListItem = (props: Props) => {
                             else{
                                 return(
                                     <Image onLoadEnd={() => start()}
-                                    source={props.profileName === 'Sponsoring' ? require("assets/images/fullSaumonLight.png") : {uri: content[current].image} }
+                                    source={props.profileName === 'Sponsoring' ? require("./assets/images/fullSaumonLight.png") : {uri: content[current].image} }
                                     style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
                                 />
                                 )
