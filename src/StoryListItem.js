@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Animated,
     Image,
@@ -13,9 +13,9 @@ import {
     SafeAreaView,
     KeyboardAvoidingView
 } from "react-native";
-import type {IUserStoryItem} from "./interfaces/IUserStory";
-import {usePrevious} from "./helpers/StateHelpers";
-import {isNullOrWhitespace} from "./helpers/ValidationHelpers";
+import type { IUserStoryItem } from "./interfaces/IUserStory";
+import { usePrevious } from "./helpers/StateHelpers";
+import { isNullOrWhitespace } from "./helpers/ValidationHelpers";
 import GestureRecognizer from 'react-native-swipe-gestures';
 import firebase from '@react-native-firebase/app';
 import { useNavigation } from '@react-navigation/native';
@@ -31,13 +31,13 @@ import NativeAdView, {
     ImageView,
     NativeMediaView,
     IconView
-  } from 'react-native-admob-native-ads';
-import {AdManager} from 'react-native-admob-native-ads';
+} from 'react-native-admob-native-ads';
+import { AdManager } from 'react-native-admob-native-ads';
 import Video from 'react-native-video';
 
 
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 type Props = {
     profileName: string,
@@ -68,7 +68,7 @@ export const StoryListItem = (props: Props) => {
         maxAdContetRating: "MA",
         tagForChildDirectedTreatment: false,
         tagForUnderAgeConsent: false,
-      };
+    };
     AdManager.setRequestConfiguration(configAds);
 
     const [open, setOpen] = useState(false);
@@ -120,22 +120,22 @@ export const StoryListItem = (props: Props) => {
     }
 
     function startAnimation(e) {
-        if (content[current].image.includes('videoStory')){
+        if (content[current].image.includes('videoStory')) {
             Animated.timing(progress, {
                 toValue: 1,
-                duration:e*1000,
+                duration: e * 1000,
                 useNativeDriver: false
-            }).start(({finished}) => {
+            }).start(({ finished }) => {
                 if (finished) {
                     next();
                 }
             });
-        }else{
+        } else {
             Animated.timing(progress, {
                 toValue: 1,
                 duration: 10000,
                 useNativeDriver: false
-            }).start(({finished}) => {
+            }).start(({ finished }) => {
                 if (finished) {
                     next();
                 }
@@ -206,40 +206,40 @@ export const StoryListItem = (props: Props) => {
         }
     }
 
-     getProfileInfos = async () => {
-        const res=await db
-        .collection('users')
-        .doc(props.id)
-        .onSnapshot(doc=>{
-            title=doc.data().title
-            displayName=doc.data().displayName
-            id=doc.data().id
-            photoURL=doc.data().photoURL
-            openProfile(title,displayName,id,photoURL)
-        })
-      }
+    getProfileInfos = async () => {
+        const res = await db
+            .collection('users')
+            .doc(props.id)
+            .onSnapshot(doc => {
+                title = doc.data().title
+                displayName = doc.data().displayName
+                id = doc.data().id
+                photoURL = doc.data().photoURL
+                openProfile(title, displayName, id, photoURL)
+            })
+    }
 
-     openProfile=(title,displayName,id,photoURL)=>{
-        data={
+    openProfile = (title, displayName, id, photoURL) => {
+        data = {
             id: id,
             name: displayName,
             title: title,
             photoUrl: photoURL
-            }
+        }
         props.onClosePress()
         navigation.navigate("ProfileFriend", {
             userData: data
         });
-     }
+    }
 
-     slidePanel = () => {
-        if(!open){
+    slidePanel = () => {
+        if (!open) {
             _panel.show()
             setOpen(!open)
-            time=JSON.stringify(progress)
-            time=parseFloat(time)
+            time = JSON.stringify(progress)
+            time = parseFloat(time)
             progress.setValue(time)
-        }else{
+        } else {
             _panel.hide()
             setOpen(!open)
             startAnimation()
@@ -248,15 +248,15 @@ export const StoryListItem = (props: Props) => {
     }
 
     storyDelete = async () => {
-        story_id=content[current].story_id
-        id=firebase.auth().currentUser.uid
+        story_id = content[current].story_id
+        id = firebase.auth().currentUser.uid
 
         const res = await db
-        .collection('users')
-        .doc(id)
-        .collection('stories')
-        .doc(story_id)
-        .delete()
+            .collection('users')
+            .doc(id)
+            .collection('stories')
+            .doc(story_id)
+            .delete()
 
         props.onClosePress()
 
@@ -269,17 +269,17 @@ export const StoryListItem = (props: Props) => {
     }
 
     pressTextInput = () => {
-        time=JSON.stringify(progress)
-        time=parseFloat(time)
+        time = JSON.stringify(progress)
+        time = parseFloat(time)
         progress.setValue(time)
     }
 
-    sendChat = () =>{
-        destinataireId=props.id
-        destinataireName=props.profileName
-        photoUrl=props.profileImage
-        story_id=content[current].story_id
-        storyImg=content[current].image
+    sendChat = () => {
+        destinataireId = props.id
+        destinataireName = props.profileName
+        photoUrl = props.profileImage
+        story_id = content[current].story_id
+        storyImg = content[current].image
 
         let toSend = {
             _id: db.collection("chats").doc().id,
@@ -287,85 +287,85 @@ export const StoryListItem = (props: Props) => {
             destinataireId: destinataireId,
             destinataireSeen: false,
             share: {
-              message:chat,
-              story_id: story_id,
-              story:storyImg,
-              typeContent: 'story',
-              contentUser:{
-                  photoURL:photoUrl,
-                  displayName:destinataireName,
-                  id:destinataireId
-              }
+                message: chat,
+                story_id: story_id,
+                story: storyImg,
+                typeContent: 'story',
+                contentUser: {
+                    photoURL: photoUrl,
+                    displayName: destinataireName,
+                    id: destinataireId
+                }
             },
             user: {
-              _id: firebase.auth().currentUser.uid,
-              avatar: firebase.auth().currentUser.photoURL,
-              name: firebase.auth().currentUser.displayName
+                _id: firebase.auth().currentUser.uid,
+                avatar: firebase.auth().currentUser.photoURL,
+                name: firebase.auth().currentUser.displayName
             },
         }
         if (firebase.auth().currentUser.uid < props.id) {
             chatId = firebase.auth().currentUser.uid + props.id;
-          } else {
+        } else {
             chatId = props.id + firebase.auth().currentUser.uid;
-          }
+        }
         let chatRef = db.collection("chats").doc(chatId);
 
         let userChatRef = db
-        .collection("users")
-        .doc(firebase.auth().currentUser.uid)
-        .collection("chats")
-        .doc(chatId)
+            .collection("users")
+            .doc(firebase.auth().currentUser.uid)
+            .collection("chats")
+            .doc(chatId)
 
         let destinataireChatRef = db
-          .collection("users")
-          .doc(destinataireId)
-          .collection("chats")
-          .doc(chatId)
+            .collection("users")
+            .doc(destinataireId)
+            .collection("chats")
+            .doc(chatId)
         chatRef
-          .get()
-          .then(async chat => {
-            if (!chat.exists) {
-              chatRef.set(
-                {
-                  users: [firebase.auth().currentUser.uid, destinataireId]
-                },
-                { merge: true }
-              )
-              .then(() => {
-                userChatRef.set(
-                  {
-                    users: [destinataireId]
-                  },
-                  { merge: true }
-                ).then(() => {
-                  destinataireChatRef.set(
-                    {
-                      users: [firebase.auth().currentUser.uid]
-                    },
-                    { merge: true }
-                  )
-                })
-              })
-            }
-            chatRef.collection("messages")
-              .add(toSend)
-              .then(async ref => {
-                await userChatRef.update({lastMessage: toSend.createdAt})
-                await destinataireChatRef.update({lastMessage: toSend.createdAt})
-                await chatRef.update({lastMessage: toSend.createdAt})
-              })
-          })
-          setChat('')
-          startAnimation()
+            .get()
+            .then(async chat => {
+                if (!chat.exists) {
+                    chatRef.set(
+                        {
+                            users: [firebase.auth().currentUser.uid, destinataireId]
+                        },
+                        { merge: true }
+                    )
+                        .then(() => {
+                            userChatRef.set(
+                                {
+                                    users: [destinataireId]
+                                },
+                                { merge: true }
+                            ).then(() => {
+                                destinataireChatRef.set(
+                                    {
+                                        users: [firebase.auth().currentUser.uid]
+                                    },
+                                    { merge: true }
+                                )
+                            })
+                        })
+                }
+                chatRef.collection("messages")
+                    .add(toSend)
+                    .then(async ref => {
+                        await userChatRef.update({ lastMessage: toSend.createdAt })
+                        await destinataireChatRef.update({ lastMessage: toSend.createdAt })
+                        await chatRef.update({ lastMessage: toSend.createdAt })
+                    })
+            })
+        setChat('')
+        startAnimation()
     }
 
     function Logger(tag = 'AD', type, value) {
         console.log(`[${tag}][${type}]:`, value);
-      }
+    }
 
     const onAdFailedToLoad = event => {
         Logger('AD', 'FAILED', event.error.message);
-      };
+    };
 
     const onAdLoaded = () => {
         Logger('AD', 'LOADED', 'Ad has loaded successfully');
@@ -374,10 +374,10 @@ export const StoryListItem = (props: Props) => {
     const onAdClicked = () => {
         Logger('AD', 'CLICK', 'User has clicked the Ad');
         props.onClosePress
-      };
+    };
 
     const swipeText = content?.[current]?.swipeText || props.swipeText || 'Swipe Up';
-     if(props.user){
+    if (props.user) {
         return (
             <GestureRecognizer
                 onSwipeUp={(state) => onSwipeUp(state)}
@@ -391,15 +391,15 @@ export const StoryListItem = (props: Props) => {
                 <SafeAreaView>
                     <View style={styles.backgroundContainer}>
                         <Image onLoadEnd={() => start()}
-                            source={{uri: content[current].image}}
+                            source={{ uri: content[current].image }}
                             style={styles.imageUser}
                         />
                         {load && <View style={styles.spinnerContainer}>
-                            <ActivityIndicator size="large" color={'white'}/>
+                            <ActivityIndicator size="large" color={'white'} />
                         </View>}
                     </View>
                 </SafeAreaView>
-                <View style={{flexDirection: 'column', flex: 1,}}>
+                <View style={{ flexDirection: 'column', flex: 1, }}>
                     <View style={styles.animationBarContainer}>
                         {content.map((index, key) => {
                             return (
@@ -416,9 +416,9 @@ export const StoryListItem = (props: Props) => {
                         })}
                     </View>
                     <View style={styles.userContainer}>
-                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Image style={styles.avatarImage}
-                                   source={{uri: props.profileImage}}
+                                source={{ uri: props.profileImage }}
                             />
 
                             <Text style={styles.avatarText}>Vous</Text>
@@ -431,21 +431,21 @@ export const StoryListItem = (props: Props) => {
                             <View style={styles.closeIconContainer}>
                                 {props.customCloseComponent ?
                                     props.customCloseComponent :
-                                    <Text style={{color: 'white'}}>X</Text>
+                                    <Text style={{ color: 'white' }}>X</Text>
                                 }
                             </View>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.option}>
-                                <TouchableOpacity
-                                    style={styles.more}
-                                    onPress={slidePanel}
-                                >
-                                    <View style={styles.moreDots} />
-                                    <View style={styles.moreDots} />
-                                    <View style={styles.moreDots} />
-                                </TouchableOpacity>
-                            </View>
+                        <TouchableOpacity
+                            style={styles.more}
+                            onPress={slidePanel}
+                        >
+                            <View style={styles.moreDots} />
+                            <View style={styles.moreDots} />
+                            <View style={styles.moreDots} />
+                        </TouchableOpacity>
+                    </View>
                     <View style={styles.pressContainer}>
                         <TouchableWithoutFeedback
                             onPressIn={() => progress.stopAnimation()}
@@ -460,35 +460,35 @@ export const StoryListItem = (props: Props) => {
                                 }
                             }}
                         >
-                            <View style={{flex: 1}}/>
+                            <View style={{ flex: 1 }} />
                         </TouchableWithoutFeedback>
                         <TouchableWithoutFeedback onPressIn={() => progress.stopAnimation()}
-                                                  onLongPress={() => setPressed(true)}
-                                                  onPressOut={() => {
-                                                      setPressed(false);
-                                                      startAnimation();
-                                                  }}
-                                                  onPress={() => {
-                                                      if (!pressed && !load) {
-                                                          next()
-                                                      }
-                                                  }}>
-                            <View style={{flex: 1}}/>
+                            onLongPress={() => setPressed(true)}
+                            onPressOut={() => {
+                                setPressed(false);
+                                startAnimation();
+                            }}
+                            onPress={() => {
+                                if (!pressed && !load) {
+                                    next()
+                                }
+                            }}>
+                            <View style={{ flex: 1 }} />
                         </TouchableWithoutFeedback>
                     </View>
                 </View>
                 {content[current].onPress &&
-                <TouchableOpacity activeOpacity={1}
-                                  onPress={onSwipeUp}
-                                  style={styles.swipeUpBtn}>
-                    {props.customSwipeUpComponent ?
-                        props.customSwipeUpComponent :
-                        <>
-                            <Text style={{color: 'white', marginTop: 5}}></Text>
-                            <Text style={{color: 'white', marginTop: 5}}>{swipeText}</Text>
-                        </>
-                    }
-                </TouchableOpacity>}
+                    <TouchableOpacity activeOpacity={1}
+                        onPress={onSwipeUp}
+                        style={styles.swipeUpBtn}>
+                        {props.customSwipeUpComponent ?
+                            props.customSwipeUpComponent :
+                            <>
+                                <Text style={{ color: 'white', marginTop: 5 }}></Text>
+                                <Text style={{ color: 'white', marginTop: 5 }}>{swipeText}</Text>
+                            </>
+                        }
+                    </TouchableOpacity>}
                 <SlidingUpPanel
                     ref={(b) => (_panel = b)}
                     animatedValue={new Animated.Value(0)}
@@ -515,7 +515,7 @@ export const StoryListItem = (props: Props) => {
                 </SlidingUpPanel>
             </GestureRecognizer>
         )
-     }else{
+    } else {
         return (
             <GestureRecognizer
                 onSwipeUp={(state) => onSwipeUp(state)}
@@ -528,30 +528,30 @@ export const StoryListItem = (props: Props) => {
             >
                 <SafeAreaView>
                     <View style={styles.backgroundContainer}>
-                        { content[current].image.includes("videoStory") ?(
+                        {content[current].image.includes("videoStory") ? (
                             <>
                                 <Video
-                                    source={{uri: content[current].image}}
+                                    source={{ uri: content[current].image }}
                                     ref={video}
                                     style={styles.image}
-                                    onLoad={ e => start(e.duration)}
+                                    onLoad={e => start(e.duration)}
 
                                 />
                             </>
                         )
-                        :
-                        <>
-                            <Image onLoadEnd={() => start()}
-                                source={props.profileName === 'Sponsoring' ? require("../../../src/assets/images/fullSaumonLight.png") : {uri: content[current].image} }
-                                style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
-                            />
-                        </>
+                            :
+                            <>
+                                <Image onLoadEnd={() => start()}
+                                    source={props.profileName === 'Sponsoring' ? require("assets/images/fullSaumonLight.png") : { uri: content[current].image }}
+                                    style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
+                                />
+                            </>
                         }
                         {/* {props.stories.map(doc=>{
                             if(doc.type =='image'){
                                 return(
                                     <Image onLoadEnd={() => start()}
-                                    source={props.profileName === 'Sponsoring' ? require("../../../src/assets/images/fullSaumonLight.png") : {uri: content[current].image} }
+                                    source={props.profileName === 'Sponsoring' ? require("assets/images/fullSaumonLight.png") : {uri: content[current].image} }
                                     style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
                                 />
                                 )
@@ -569,7 +569,7 @@ export const StoryListItem = (props: Props) => {
                             else{
                                 return(
                                     <Image onLoadEnd={() => start()}
-                                    source={props.profileName === 'Sponsoring' ? require("../../../src/assets/images/fullSaumonLight.png") : {uri: content[current].image} }
+                                    source={props.profileName === 'Sponsoring' ? require("assets/images/fullSaumonLight.png") : {uri: content[current].image} }
                                     style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
                                 />
                                 )
@@ -577,11 +577,11 @@ export const StoryListItem = (props: Props) => {
                         })} */}
 
                         {load && <View style={styles.spinnerContainer}>
-                            <ActivityIndicator size="large" color={'white'}/>
+                            <ActivityIndicator size="large" color={'white'} />
                         </View>}
                     </View>
                 </SafeAreaView>
-                <View style={{flexDirection: 'column', flex: 1,}}>
+                <View style={{ flexDirection: 'column', flex: 1, }}>
                     <View style={styles.animationBarContainer}>
                         {content.map((index, key) => {
                             return (
@@ -598,20 +598,20 @@ export const StoryListItem = (props: Props) => {
                         })}
                     </View>
                     <View style={styles.userContainer}>
-                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             {props.profileName === 'Sponsoring' ? (
                                 <Image style={styles.avatarImage}
                                     source={require("../../../src/assets/images/logoNotif.png")}
                                 />
-                            ):(
+                            ) : (
                                 <Image style={styles.avatarImage}
-                                    source={{uri: props.profileImage}}
+                                    source={{ uri: props.profileImage }}
                                 />
                             )}
 
                             <TouchableOpacity
-                                onPress={()=> console.log(content[current].image)}>
-                            <Text style={styles.avatarText}>{props.profileName}</Text>
+                                onPress={() => console.log(content[current].image)}>
+                                <Text style={styles.avatarText}>{props.profileName}</Text>
                             </TouchableOpacity>
                         </View>
 
@@ -623,7 +623,7 @@ export const StoryListItem = (props: Props) => {
                             <View style={styles.closeIconContainer}>
                                 {props.customCloseComponent ?
                                     props.customCloseComponent :
-                                    <Text style={{color: 'white'}}>X</Text>
+                                    <Text style={{ color: 'white' }}>X</Text>
                                 }
                             </View>
                         </TouchableOpacity>
@@ -642,188 +642,188 @@ export const StoryListItem = (props: Props) => {
                                 }
                             }}
                         >
-                            <View style={{flex: 1}}/>
+                            <View style={{ flex: 1 }} />
                         </TouchableWithoutFeedback>
                         <TouchableWithoutFeedback onPressIn={() => progress.stopAnimation()}
-                                                  onLongPress={() => setPressed(true)}
-                                                  onPressOut={() => {
-                                                      setPressed(false);
-                                                      startAnimation();
-                                                  }}
-                                                  onPress={() => {
-                                                      if (!pressed && !load) {
-                                                          next()
-                                                      }
-                                                  }}>
-                            <View style={{flex: 1}}/>
+                            onLongPress={() => setPressed(true)}
+                            onPressOut={() => {
+                                setPressed(false);
+                                startAnimation();
+                            }}
+                            onPress={() => {
+                                if (!pressed && !load) {
+                                    next()
+                                }
+                            }}>
+                            <View style={{ flex: 1 }} />
                         </TouchableWithoutFeedback>
                     </View>
                 </View>
                 {props.profileName === 'Sponsoring' ? (
-                        <View style={styles.adsContainer}>
-                            <View style={styles.containerAds}>
-                                <NativeAdView
-                                    ref={nativeAdViewRef}
-                                    refreshInterval={60000 * 2}
-                                    onAdClicked={onAdClicked}
+                    <View style={styles.adsContainer}>
+                        <View style={styles.containerAds}>
+                            <NativeAdView
+                                ref={nativeAdViewRef}
+                                refreshInterval={60000 * 2}
+                                onAdClicked={onAdClicked}
+                                style={{
+                                    width: '100%',
+                                    height: '80%',
+                                    alignSelf: 'center',
+                                    backgroundColor: "transparent",
+                                }}
+                                enableTestMode
+                                adUnitID="ca-app-pub-3940256099942544/2247696110"
+                            >
+                                <View
                                     style={{
-                                           width: '100%',
-                                           height:'80%',
-                                           alignSelf: 'center',
-                                           backgroundColor:"transparent",
+                                        width: '100%',
                                     }}
-                                    enableTestMode
-                                    adUnitID="ca-app-pub-3940256099942544/2247696110"
                                 >
+                                    <ImageView
+                                        style={{
+                                            width: "100%",
+                                            height: 190,
+                                            marginTop: 5,
+                                            zIndex: 100
+                                        }}
+                                    />
                                     <View
                                         style={{
-                                          width: '100%',
-                                        }}
-                                    >
-                                        <ImageView 
+                                            marginTop: -10,
+                                            height: 350,
+                                            width: "100%",
+                                            backgroundColor: 'rgb(245,165,114)',
+                                            borderBottomEndRadius: 20,
+                                            borderBottomStartRadius: 20,
+                                            alignItems: 'center',
+                                            paddingLeft: 30,
+                                            paddingRight: 30
+                                        }}>
+                                        <IconView
                                             style={{
-                                              width: "100%",
-                                              height:190,
-                                              marginTop:5,
-                                              zIndex:100
+                                                width: 70,
+                                                height: 70,
+                                                marginTop: 50
                                             }}
                                         />
-                                        <View 
-                                            style={{
-                                                marginTop:-10,
-                                                height:350,
-                                                width:"100%",
-                                                backgroundColor:'rgb(245,165,114)',
-                                                borderBottomEndRadius:20,
-                                                borderBottomStartRadius:20,
-                                                alignItems:'center',
-                                                paddingLeft:30,
-                                                paddingRight:30
-                                            }}>
-                                            <IconView
-                                                style={{
-                                                    width: 70,
-                                                    height: 70,
-                                                    marginTop:50
-                                                }}
-                                            />
 
-                                             <HeadlineView
-                                              style={{
+                                        <HeadlineView
+                                            style={{
                                                 fontSize: 18,
-                                                fontFamily:'Gelion-Regular',
-                                                marginTop:20,
-                                                textAlign:'center',
-                                              }}
-                                            />
-                                            <TaglineView
-                                              numberOfLines={2}
-                                              style={{
-                                                marginTop:15,
+                                                fontFamily: 'Gelion-Regular',
+                                                marginTop: 20,
+                                                textAlign: 'center',
+                                            }}
+                                        />
+                                        <TaglineView
+                                            numberOfLines={2}
+                                            style={{
+                                                marginTop: 15,
                                                 fontSize: 14,
-                                                fontFamily:'Gilroy-Medium',
-                                                textAlign:'center'
-                                              }}
-                                            />
-                                            <AdvertiserView
-                                              style={{
+                                                fontFamily: 'Gilroy-Medium',
+                                                textAlign: 'center'
+                                            }}
+                                        />
+                                        <AdvertiserView
+                                            style={{
                                                 fontSize: 10,
                                                 color: 'gray',
-                                              }}
-                                            />
-                                            <StoreView
+                                            }}
+                                        />
+                                        <StoreView
+                                            style={{
+                                                fontSize: 12,
+                                                marginTop: 15
+                                            }}
+                                        />
+                                        <View
+                                            style={{
+                                                marginTop: 20,
+                                                height: 50,
+                                                width: "100%",
+                                                backgroundColor: 'rgb( 252,232,201)',
+                                                borderRadius: 12,
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                ...shadowStyles
+                                            }}
+                                        >
+                                            <Text
                                                 style={{
-                                                  fontSize: 12,
-                                                  marginTop:15
-                                                }}
-                                            />
-                                            <View
-                                                style={{
-                                                    marginTop:20,
-                                                    height:50,
-                                                    width:"100%",
-                                                    backgroundColor:'rgb( 252,232,201)',
-                                                    borderRadius:12,
-                                                    justifyContent:'center',
-                                                    alignItems:'center',
-                                                    ...shadowStyles
-                                                }}
-                                            >
-                                                <Text
-                                                style={{
-                                                    fontFamily:'Gelion-Medium',
-                                                    fontSize:20,
-                                                    color:colors.dBlue
+                                                    fontFamily: 'Gelion-Medium',
+                                                    fontSize: 20,
+                                                    color: colors.dBlue
                                                 }}>Visiter</Text>
-
-                                            </View>
 
                                         </View>
 
+                                    </View>
+
                                 </View>
                             </NativeAdView>
-                            </View>
                         </View>
-                        ):(
-                            <View></View>
-                        )}
-                {props.id === firebase.auth().currentUser.uid || props.profileName === 'Sponsoring'? (
+                    </View>
+                ) : (
                     <View></View>
-                ):(
+                )}
+                {props.id === firebase.auth().currentUser.uid || props.profileName === 'Sponsoring' ? (
+                    <View></View>
+                ) : (
                     comment ? (
                         <KeyboardAvoidingView style={styles.keyboard} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200} behavior={'position'}>
-                        <View style={[styles.bottom, {minHeight: screen.h/9 }]}>
-                          <View style={[styles.rowContainer]}
-                          >
-                            <TextInput
-                              style={styles.input}
-                              value={chat}
-                              placeholder={'Ecrivez votre message...'}
-                              placeholderTextColor={colors.label}
-                              keyboardType={"default"}
-                              maxLength={25}
-                              multiline={true}
-                              returnKeyType={"done"}
-                              onChangeText={e => setChat(e)}
-                              onFocus={pressTextInput}
-                            />
-                            {chat.length > 0 ? (
-                                <TouchableOpacity
-                                    onPress={this.sendChat}
-                                    style={styles.sendButton}
+                            <View style={[styles.bottom, { minHeight: screen.h / 9 }]}>
+                                <View style={[styles.rowContainer]}
                                 >
-                                    <Image
-                                      source={require("../../../src/assets/images/icons/bxs-sendWhite.png")}
-                                      resizeMode={"contain"}
-                                      style={styles.illuSend}
+                                    <TextInput
+                                        style={styles.input}
+                                        value={chat}
+                                        placeholder={'Ecrivez votre message...'}
+                                        placeholderTextColor={colors.label}
+                                        keyboardType={"default"}
+                                        maxLength={25}
+                                        multiline={true}
+                                        returnKeyType={"done"}
+                                        onChangeText={e => setChat(e)}
+                                        onFocus={pressTextInput}
                                     />
-                                </TouchableOpacity>
-                            ) :(
-                            <TouchableOpacity
-                                onPress={this.sendChat}
-                                style={styles.sendButton}
-                                disabled
-                            >
-                                    <Image
-                                      source={require("../../../src/assets/images/icons/bxs-sendWhite.png")}
-                                      resizeMode={"contain"}
-                                      style={styles.illuSend}
-                                    />
-                          </TouchableOpacity>)}
-                          </View>
+                                    {chat.length > 0 ? (
+                                        <TouchableOpacity
+                                            onPress={this.sendChat}
+                                            style={styles.sendButton}
+                                        >
+                                            <Image
+                                                source={require("../../../src/assets/images/icons/bxs-sendWhite.png")}
+                                                resizeMode={"contain"}
+                                                style={styles.illuSend}
+                                            />
+                                        </TouchableOpacity>
+                                    ) : (
+                                        <TouchableOpacity
+                                            onPress={this.sendChat}
+                                            style={styles.sendButton}
+                                            disabled
+                                        >
+                                            <Image
+                                                source={require("../../../src/assets/images/icons/bxs-sendWhite.png")}
+                                                resizeMode={"contain"}
+                                                style={styles.illuSend}
+                                            />
+                                        </TouchableOpacity>)}
+                                </View>
+                            </View>
+                            <View style={styles.box}></View>
+
+                        </KeyboardAvoidingView>
+                    ) : (
+                        <View>
+
                         </View>
-                        <View style={styles.box}></View>
-
-                      </KeyboardAvoidingView>
-                ) : (
-                    <View>
-
-                    </View>
-                )
+                    )
                 )}
             </GestureRecognizer>
         )
-     }
+    }
 }
 
 
@@ -843,7 +843,7 @@ const styles = StyleSheet.create({
         height: height,
         resizeMode: 'cover'
     },
-    imageUser:{
+    imageUser: {
         width: width,
         height: height,
         resizeMode: 'cover'
@@ -913,8 +913,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         paddingTop: 25,
         right: 18,
-        top:40,
-        zIndex:100
+        top: 40,
+        zIndex: 100
     },
     more: {
         alignItems: 'center',
@@ -933,7 +933,7 @@ const styles = StyleSheet.create({
         marginLeft: 3,
         backgroundColor: colors.appBg,
         color: colors.appBg,
-        marginTop:1.5
+        marginTop: 1.5
     },
     containerSliding: {
         zIndex: 1000,
@@ -980,45 +980,45 @@ const styles = StyleSheet.create({
     optionArrow: {
         marginRight: 20,
     },
-    comment:{
-        height:40,
-        width:screen.w/1.5,
-        backgroundColor:'rgba(0, 0, 0, 0.4)',
-        alignSelf:'center',
-        borderRadius:12,
-        marginBottom:10,
-        justifyContent:'center'
+    comment: {
+        height: 40,
+        width: screen.w / 1.5,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        alignSelf: 'center',
+        borderRadius: 12,
+        marginBottom: 10,
+        justifyContent: 'center'
 
     },
-    commentButton:{
-        paddingLeft:15
+    commentButton: {
+        paddingLeft: 15
     },
-    commentText:{
-        color:'white',
-        fontFamily:'Gelion-Medium'
+    commentText: {
+        color: 'white',
+        fontFamily: 'Gelion-Medium'
     },
     keyboard: {
         position: 'absolute',
-        bottom:0,
+        bottom: 0,
         zIndex: 100,
-        marginTop:20
+        marginTop: 20
 
-      },
-      bottom: {
+    },
+    bottom: {
         width: screen.w,
         paddingHorizontal: 20,
-        backgroundColor:'rgb(49,37,33)',
-        justifyContent:'center',
+        backgroundColor: 'rgb(49,37,33)',
+        justifyContent: 'center',
 
-      },
-      rowContainer: {
+    },
+    rowContainer: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: 'space-between',
         width: screen.w - 40,
 
-      },
-      input: {
+    },
+    input: {
         fontFamily: "Gelion-Light",
         fontSize: 17,
         color: 'white',
@@ -1028,44 +1028,44 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.greyBorder,
         borderRadius: 20,
-        backgroundColor:'rgb(49,37,33)',
-        paddingTop:10,
+        backgroundColor: 'rgb(49,37,33)',
+        paddingTop: 10,
 
-      },
-      label: {
+    },
+    label: {
         fontFamily: "Gilroy-Light",
         fontSize: 17,
         color: 'white',
         marginLeft: 25
-      },
-      sendButton: {
-        backgroundColor:'grey',
+    },
+    sendButton: {
+        backgroundColor: 'grey',
         height: 45,
         width: 45,
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 16,
-      },
-      illuSend: {
+    },
+    illuSend: {
         width: 20,
         height: 20
-      },
-      box:{
-        height:20,
-        width:width,
-        backgroundColor:'rgb(49,37,33)'
     },
-     adsContainer:{
-        marginTop:100,
-        height:screen.h-110,
+    box: {
+        height: 20,
+        width: width,
+        backgroundColor: 'rgb(49,37,33)'
+    },
+    adsContainer: {
+        marginTop: 100,
+        height: screen.h - 110,
         width: screen.w,
-        padding:20,
-     },
-     containerAds:{
-         backgroundColor:'#f0f0f0',
-         borderRadius:20,
-         padding:10,
-         ...shadowStyles
-     }
+        padding: 20,
+    },
+    containerAds: {
+        backgroundColor: '#f0f0f0',
+        borderRadius: 20,
+        padding: 10,
+        ...shadowStyles
+    }
 
 });
