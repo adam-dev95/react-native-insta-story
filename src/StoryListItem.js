@@ -61,7 +61,7 @@ export const StoryListItem = (props: Props) => {
     const [pressed, setPressed] = useState(false);
     const [comment, setComment] = useState(true)
     const [chat, setChat] = useState('')
-    const [durationTime, setDurationTime] = useState(0)
+    const [play,setPlay] = useState(false)
     const nativeAdViewRef = useRef();
     const video = useRef();
     const configAds = {
@@ -79,6 +79,7 @@ export const StoryListItem = (props: Props) => {
                 image: x.story_image,
                 onPress: x.onPress,
                 swipeText: x.swipeText,
+                position : i,
                 finish: 0
             }
         }));
@@ -89,6 +90,8 @@ export const StoryListItem = (props: Props) => {
 
     useEffect(() => {
         setCurrent(0);
+        console.log('sto',stories)
+        console.log('content',content)
         if (props.currentPage != 0) {
             let data = [...content];
             data.map((x, i) => {
@@ -110,7 +113,7 @@ export const StoryListItem = (props: Props) => {
                 start();
             }
         }
-
+        // console.log(props.currentPage,'le deuxieme')
     }, [current]);
 
     function start(e) {
@@ -171,9 +174,15 @@ export const StoryListItem = (props: Props) => {
             setContent(data);
             setCurrent(current + 1);
             progress.setValue(0);
+            // passe a la story suivante
+            console.log('changement de story meme personne')
         } else {
             // the next content is empty
             close('next');
+            console.log(' changement de personne')
+            // passe a la story de la personne suivante
+            // recuperer la data et travailler autour du next 
+            setPlay(!play)
         }
     }
 
@@ -191,6 +200,7 @@ export const StoryListItem = (props: Props) => {
         } else {
             // the previous content is empty
             close('previous');
+            console.log('retour')
         }
     }
 
@@ -528,54 +538,49 @@ export const StoryListItem = (props: Props) => {
             >
                 <SafeAreaView>
                     <View style={styles.backgroundContainer}>
-                        {content[current].image.includes("videoStory") ? (
-                            <>
-                                <Video
-                                    source={{ uri: content[current].image }}
-                                    ref={video}
-                                    style={styles.image}
-                                    onLoad={e => start(e.duration)}
-
-                                />
-                            </>
-                        )
-                            :
-                            <>
-                                <Image onLoadEnd={() => start()}
-                                    source={props.profileName === 'Sponsoring' ? require("./assets/images/fullSaumonLight.png") : { uri: content[current].image }}
-                                    style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
-                                />
-                            </>
-                        }
-                        {/* {props.stories.map(doc=>{
-                            if(doc.type =='image'){
-                                return(
-                                    <Image onLoadEnd={() => start()}
-                                    source={props.profileName === 'Sponsoring' ? require("./assets/images/fullSaumonLight.png") : {uri: content[current].image} }
-                                    style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
-                                />
-                                )
-                            }
-                            else if(doc.type =='video'){
-                                return(
+                    { content[current].image.includes("videoStory") ?(
+                            // props.id === firebase.auth().currentUser.uid ? (
+                            //         <Video
+                            //             source={{uri: content[current].image}}
+                            //             ref={video}
+                            //             style={styles.image}
+                            //             onLoad={ e => start(e.duration)}
+                            //             onLoadEnd={e => console.log('ok')}
+                            //             // onProgress={e => console.log(e.currentTime)}
+                            //             paused={play}
+                            //         />
+                            //     ):(
+                            //         <Video
+                            //             source={{uri: content[current].image}}
+                            //             ref={video}
+                            //             style={styles.image}
+                            //             onLoad={ e => start(e.duration)}
+                            //             onLoadEnd={e => console.log('ok')}
+                            //             // onProgress={e => console.log(e.currentTime)}
+                            //             paused={!play}
+                            //         />
+                            //     )):(
+                            //     <Image onLoadEnd={() => start()}
+                            //         source={props.profileName === 'Sponsoring' ? require("./assets/images/fullSaumonLight.png") : { uri: content[current].image }}
+                            //         style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
+                            //     />
+                            //     )
                                 <Video
                                     source={{uri: content[current].image}}
                                     ref={video}
                                     style={styles.image}
                                     onLoad={ e => start(e.duration)}
+                                    // onProgress={e => console.log(e.currentTime)}
+                                    paused={play}
                                 />
-                                )
-                            }
-                            else{
-                                return(
-                                    <Image onLoadEnd={() => start()}
-                                    source={props.profileName === 'Sponsoring' ? require("./assets/images/fullSaumonLight.png") : {uri: content[current].image} }
-                                    style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
+                        )
+                        :
+                                <Image onLoadEnd={() => start()}
+                                source={props.profileName === 'Sponsoring' ? require("./assets/images/fullSaumonLight.png") : { uri: content[current].image }}
+                                style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
                                 />
-                                )
-                            }
-                        })} */}
-
+                        }
+                        
                         {load && <View style={styles.spinnerContainer}>
                             <ActivityIndicator size="large" color={'white'} />
                         </View>}
