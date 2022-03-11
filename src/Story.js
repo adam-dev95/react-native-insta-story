@@ -1,13 +1,13 @@
-import React, { Fragment, useRef, useState, useEffect } from "react";
-import { LogBox, Dimensions, View, Platform } from "react-native";
+import React, {Fragment, useRef, useState,useEffect} from "react";
+import {LogBox, Dimensions, View, Platform} from "react-native";
 import Modal from "react-native-modalbox";
 import StoryListItem from "./StoryListItem";
 import StoryCircleListView from "./StoryCircleListView";
-import { isNullOrWhitespace } from "./helpers/ValidationHelpers";
-import type { IUserStory } from "./interfaces/IUserStory";
+import {isNullOrWhitespace} from "./helpers/ValidationHelpers";
+import type {IUserStory} from "./interfaces/IUserStory";
 import AndroidCubeEffect from "./components/AndroidCubeEffect";
 import CubeNavigationHorizontal from "./components/CubeNavigationHorizontal";
-import { TextStyle } from "react-native";
+import {TextStyle} from "react-native";
 
 type Props = {
     data: IUserStory[],
@@ -23,9 +23,10 @@ type Props = {
     avatarSize?: number,
     showAvatarText?: boolean,
     avatarTextStyle?: TextStyle,
-    user?: Boolean,
-    radius?: Number,
-    scroll?: Boolean
+    user?:Boolean,
+    radius?:Number,
+    scroll?:Boolean,
+    action?:function,
 };
 
 LogBox.ignoreLogs(['Warning: componentWillReceiveProps']); // Ignore log notification by message
@@ -47,7 +48,8 @@ export const Story = (props: Props) => {
         avatarTextStyle,
         user,
         radius,
-        scroll
+        scroll,
+        action,
     } = props;
 
     const [dataState, setDataState] = useState(data);
@@ -68,12 +70,12 @@ export const Story = (props: Props) => {
     };
     useEffect(() => {
         handleSeen();
-    }, [currentPage]);
+    },[currentPage]);
     const handleSeen = () => {
         const seen = selectedData[currentPage];
         const seenIndex = dataState.indexOf(seen);
         if (seenIndex > 0) {
-            if (!dataState[seenIndex]?.seen) {
+            if(!dataState[seenIndex]?.seen){
                 let tempData = dataState;
                 dataState[seenIndex] = {
                     ...dataState[seenIndex],
@@ -112,25 +114,29 @@ export const Story = (props: Props) => {
     }
 
     const renderStoryList = () => selectedData.map((x, i) => {
-        return (<StoryListItem duration={duration * 1000}
-            key={i}
-            profileName={x.user_name}
-            profileImage={x.user_image}
-            id={x.user_id}
-            user={props.user}
-            stories={x.stories}
-            currentPage={currentPage}
-            onFinish={onStoryFinish}
-            swipeText={swipeText}
-            customSwipeUpComponent={customSwipeUpComponent}
-            customCloseComponent={customCloseComponent}
-            onClosePress={() => {
-                setIsModalOpen(false);
-                if (onClose) {
-                    onClose(x);
-                }
-            }}
-            index={i} />)
+        return (
+                    <StoryListItem duration={duration * 1000}
+                               key={i}
+                               action={action}
+                               profileName={x.user_name}
+                               profileImage={x.user_image}
+                               id={x.user_id}
+                               user={props.user}
+                               stories={x.stories}
+                               currentPage={currentPage}
+                               onFinish={onStoryFinish}
+                               swipeText={swipeText}
+                               customSwipeUpComponent={customSwipeUpComponent}
+                               customCloseComponent={customCloseComponent}
+                               onClosePress={() => {
+                                   setIsModalOpen(false);
+                                   if (onClose) {
+                                       onClose(x);
+                                   }
+                                }}
+                               index={i}
+                    />
+                )
     })
 
     const renderCube = () => {
