@@ -71,8 +71,7 @@ class StoryCircleListItem extends Component {
                         style={{
                             height: avatarSize ?? 60,
                             width: avatarSize ?? 60,
-                            borderRadius: avatarSize > 100 ? 16 : 100,
-                            // borderRadius: 100,
+                            borderRadius: avatarSize > 100 ? 14 : 100,
 
                         }}
                         source={{uri: item.user_image}}
