@@ -88,8 +88,7 @@ class StoryCircleListItem extends Component {
 
 export default StoryCircleListItem;
 
-const
-    styles = StyleSheet.create({
+const styles = StyleSheet.create({
         container: {
             marginVertical: 5,
             marginRight: 14
