@@ -532,11 +532,10 @@ export const StoryListItem = (props: Props) => {
 
                             <Video
                                 source={{ uri: content[current].image }}
-                                ref={video}
                                 posterResizeMode={'cover'}
                                 style={{ height: height }}
                                 onLoad={e => start(e.duration)}
-
+                                resizeMode="cover"
                             />
 
                         )
@@ -548,35 +547,6 @@ export const StoryListItem = (props: Props) => {
                                 />
                             </>
                         }
-                        {/* {props.stories.map(doc=>{
-                            if(doc.type =='image'){
-                                return(
-                                    <Image onLoadEnd={() => start()}
-                                    source={props.profileName === 'Sponsoring' ? require("./assets/images/fullSaumonLight.png") : {uri: content[current].image} }
-                                    style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
-                                />
-                                )
-                            }
-                            else if(doc.type =='video'){
-                                return(
-                                <Video
-                                    source={{uri: content[current].image}}
-                                    ref={video}
-                                    style={styles.image}
-                                    onLoad={ e => start(e.duration)}
-                                />
-                                )
-                            }
-                            else{
-                                return(
-                                    <Image onLoadEnd={() => start()}
-                                    source={props.profileName === 'Sponsoring' ? require("./assets/images/fullSaumonLight.png") : {uri: content[current].image} }
-                                    style={props.id === firebase.auth().currentUser.uid ? styles.imageUser : styles.image}
-                                />
-                                )
-                            }
-                        })} */}
-
                         {load && <View style={styles.spinnerContainer}>
                             <ActivityIndicator size="large" color={'white'} />
                         </View>}
