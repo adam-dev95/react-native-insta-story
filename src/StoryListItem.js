@@ -25,11 +25,9 @@ import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import NativeAdView, {
     AdvertiserView,
     HeadlineView,
-    StarRatingView,
     StoreView,
     TaglineView,
     ImageView,
-    NativeMediaView,
     IconView
 } from 'react-native-admob-native-ads';
 import { AdManager } from 'react-native-admob-native-ads';
@@ -864,8 +862,11 @@ const styles = StyleSheet.create({
     closeIconContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        height: 50,
-        paddingHorizontal: 15,
+        height: 30,
+        width: 30,
+        marginTop: 10,
+        borderRadius: 15,
+        backgroundColor: 'rgba(245,245,245, .5)',
     },
     pressContainer: {
         flex: 1,
