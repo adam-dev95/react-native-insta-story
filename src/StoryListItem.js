@@ -532,10 +532,10 @@ export const StoryListItem = (props: Props) => {
 
                             <Video
                                 source={{ uri: content[current].image }}
-                                posterResizeMode={'cover'}
+                                posterResizeMode={'contain'}
+                                resizeMode={'contain'}
                                 style={{ height: height }}
                                 onLoad={e => start(e.duration)}
-                                resizeMode="cover"
                             />
 
                         )
@@ -742,7 +742,7 @@ export const StoryListItem = (props: Props) => {
                     <View></View>
                 ) : (
                     comment ? (
-                        <KeyboardAvoidingView style={styles.keyboard} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200} behavior={'position'}>
+                        <KeyboardAvoidingView style={styles.keyboard} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -220} behavior={'position'}>
                             <View style={[styles.bottom, { minHeight: screen.h / 9 }]}>
                                 <View style={[styles.rowContainer]}
                                 >
@@ -787,9 +787,7 @@ export const StoryListItem = (props: Props) => {
 
                         </KeyboardAvoidingView>
                     ) : (
-                        <View>
-
-                        </View>
+                        <View />
                     )
                 )}
             </GestureRecognizer>
@@ -812,12 +810,12 @@ const styles = StyleSheet.create({
     image: {
         width: width,
         height: height,
-        resizeMode: 'cover'
+        resizeMode: 'contain'
     },
     imageUser: {
         width: width,
         height: height,
-        resizeMode: 'cover'
+        resizeMode: 'contain'
     },
     backgroundContainer: {
         position: 'absolute',
