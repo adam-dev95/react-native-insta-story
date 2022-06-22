@@ -22,15 +22,15 @@ import { useNavigation } from '@react-navigation/native';
 import colors, { screen, shadowStyles } from '../../../src/global/constants';
 import SlidingUpPanel from 'rn-sliding-up-panel'
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
-import NativeAdView, {
-    AdvertiserView,
-    HeadlineView,
-    StoreView,
-    TaglineView,
-    ImageView,
-    IconView
-} from 'react-native-admob-native-ads';
-import { AdManager } from 'react-native-admob-native-ads';
+// import NativeAdView, {
+//     AdvertiserView,
+//     HeadlineView,
+//     StoreView,
+//     TaglineView,
+//     ImageView,
+//     IconView
+// } from 'react-native-admob-native-ads';
+// import { AdManager } from 'react-native-admob-native-ads';
 import Video from 'react-native-video';
 
 
@@ -67,7 +67,7 @@ export const StoryListItem = (props: Props) => {
         tagForChildDirectedTreatment: false,
         tagForUnderAgeConsent: false,
     };
-    AdManager.setRequestConfiguration(configAds);
+    // AdManager.setRequestConfiguration(configAds);
 
     const [open, setOpen] = useState(false);
     const [content, setContent] = useState(
@@ -631,7 +631,7 @@ export const StoryListItem = (props: Props) => {
                 {props.profileName === 'Sponsoring' ? (
                     <View style={styles.adsContainer}>
                         <View style={styles.containerAds}>
-                            <NativeAdView
+                            {/* <NativeAdView
                                 ref={nativeAdViewRef}
                                 refreshInterval={60000 * 2}
                                 onAdClicked={onAdClicked}
@@ -730,7 +730,7 @@ export const StoryListItem = (props: Props) => {
                                     </View>
 
                                 </View>
-                            </NativeAdView>
+                            </NativeAdView> */}
                         </View>
                     </View>
                 ) : (
